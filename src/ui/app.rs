@@ -10,7 +10,7 @@ use std::num::NonZeroU16;
 use std::thread;
 
 use bitflags::bitflags;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use crossterm::cursor::{Hide, Show};
 use crossterm::execute;
 use crossterm::terminal::{SetTitle, size};
@@ -131,7 +131,7 @@ pub struct App
     /// Flags for managing the application state.
     pub app_state: AppStateFlags,
     /// Handle graceful terminal shutdown.
-    #[allow(
+    #[expect(
         dead_code,
         reason = "Its purpose is its `Drop` implementation, not direct field \
                   access."
@@ -470,7 +470,7 @@ impl App
         /// Search prompt prefix.
         const SEARCH_PROMPT: &str = "/";
         /// Prefix length for the search prompt ("/").
-        #[allow(
+        #[expect(
             clippy::cast_possible_truncation,
             reason = "Terminal width is excpected to fit in u16 bounds"
         )]

@@ -330,10 +330,11 @@ mod tests
     use super::*;
 
     #[test]
-    fn test_clear_with_files() -> Result<()>
+    fn test_clear_with_files()
     {
         // Create a temporary directory for testing
-        let temp_dir = TempDir::new()?;
+        let temp_dir = TempDir::new()
+            .expect("Failed to create temporary directory for testing");
         let cache_dir = temp_dir.path();
 
         // Bypass the ctor for the temp dir.
@@ -346,8 +347,10 @@ mod tests
         for file_name in &file_paths
         {
             let file_path = cache_dir.join(file_name);
-            let mut file = File::create(&file_path)?;
-            writeln!(file, "test content")?;
+            let mut file =
+                File::create(&file_path).expect("Failed to create test file");
+            writeln!(file, "test content")
+                .expect("Failed to write to test file");
         }
 
         // Verify files exist before clearing
@@ -356,7 +359,9 @@ mod tests
             assert!(cache_dir.join(file_name).exists());
         }
 
-        cache.clear()?;
+        cache
+            .clear()
+            .expect("Failed to clear cache directory with files");
 
         // Verify all files have been deleted
         for file_name in &file_paths
@@ -366,15 +371,14 @@ mod tests
 
         // Verify the directory has been removed
         assert!(!cache_dir.exists());
-
-        Ok(())
     }
 
     #[test]
-    fn test_clear_with_no_files() -> Result<()>
+    fn test_clear_with_no_files()
     {
         // Create a temporary directory for testing
-        let temp_dir = TempDir::new()?;
+        let temp_dir = TempDir::new()
+            .expect("Failed to create temporary directory for testing");
         let cache_dir = temp_dir.path();
 
         let cache = RfcCache {
@@ -382,19 +386,20 @@ mod tests
         };
 
         // Call the clear function on an empty directory
-        cache.clear()?;
+        cache
+            .clear()
+            .expect("Failed to clear cache directory when it is already empty");
 
         // Verify the directory has been removed
         assert!(!cache_dir.exists());
-
-        Ok(())
     }
 
     #[test]
-    fn test_clear_with_mixed_content() -> Result<()>
+    fn test_clear_with_mixed_content()
     {
         // Create a temporary directory for testing
-        let temp_dir = TempDir::new()?;
+        let temp_dir = TempDir::new()
+            .expect("Failed to create temporary directory for testing");
         let cache_dir = temp_dir.path();
 
         // Create an instance with the temp directory
@@ -404,14 +409,18 @@ mod tests
 
         // Create a file
         let file_path = cache_dir.join("file.txt");
-        let mut file = File::create(&file_path)?;
-        writeln!(file, "test content")?;
+        let mut file =
+            File::create(&file_path).expect("Failed to create test file");
+        writeln!(file, "test content").expect("Failed to write to test file");
 
         // Create a subdirectory
         let subdir_path = cache_dir.join("subdir");
-        std::fs::create_dir(&subdir_path)?;
+        std::fs::create_dir(&subdir_path)
+            .expect("Failed to create subdirectory");
 
-        cache.clear()?;
+        cache
+            .clear()
+            .expect("Failed to clear cache directory with mixed content");
 
         // Verify the file is gone
         assert!(!file_path.exists());
@@ -421,14 +430,13 @@ mod tests
 
         // The subdirectory should be removed
         assert!(!subdir_path.exists());
-
-        Ok(())
     }
 
     #[test]
-    fn test_rfc_round_trip() -> Result<()>
+    fn test_rfc_round_trip()
     {
-        let temp_dir = TempDir::new()?;
+        let temp_dir = TempDir::new()
+            .expect("Failed to create temporary directory for testing");
         let cache = RfcCache {
             cache_dir: temp_dir.path().into(),
         };
@@ -437,7 +445,9 @@ mod tests
         let content = "RFC Content Test";
 
         // Cache the bogus RFC
-        cache.cache_rfc(rfc_number, content)?;
+        cache
+            .cache_rfc(rfc_number, content)
+            .expect("Failed to cache RFC");
 
         // Verify file exists on disk
         let expected_path = temp_dir
@@ -446,9 +456,9 @@ mod tests
         assert!(expected_path.exists());
 
         // Retrieve the bogus RFC
-        let cached_content = cache.get_cached_rfc(rfc_number)?;
+        let cached_content = cache
+            .get_cached_rfc(rfc_number)
+            .expect("Failed to retrieve cached RFC");
         assert_eq!(cached_content.as_ref(), content);
-
-        Ok(())
     }
 }

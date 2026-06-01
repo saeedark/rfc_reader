@@ -85,7 +85,7 @@ fn main() -> Result<()>
     // Get RFC if specified
     let rfc_number: RfcNum = *matches
         .get_one("rfc")
-        .ok_or(anyhow!("RFC number is required"))?;
+        .ok_or_else(|| anyhow!("RFC number is required"))?;
 
     // Get the RFC content - first check cache, then fetch from network if
     // needed
@@ -148,7 +148,7 @@ fn main() -> Result<()>
 /// # Errors
 ///
 /// Returns an error if the terminal fails to draw to the screen.
-#[allow(clippy::too_many_lines, reason = "Keybindings are verbose")]
+#[expect(clippy::too_many_lines, reason = "Keybindings are verbose")]
 fn run_app<T: RatatuiBackend>(
     terminal: &mut Terminal<T>,
     mut app: App,

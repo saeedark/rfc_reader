@@ -25,9 +25,9 @@ license-file = "LICENSE"
 
 [dependencies]
 anyhow = "1.0.102"
-bitflags = "2.11.0"
-cached = "0.59.0"
-clap = { version = "4.6.0", features = ["cargo"] }
+bitflags = "2.11.1"
+cached = "1.1.0"
+clap = { version = "4.6.1", features = ["cargo"] }
 # i'm only using event handling, no need for the serde, event-stream stuff
 crossterm = { version = "0.29.0", default-features = false, features = [
     "events",
@@ -35,7 +35,7 @@ crossterm = { version = "0.29.0", default-features = false, features = [
 directories = "6.0.0"
 env_logger = "0.11.10"
 file-rotate = "0.8.0"
-log = "0.4.29"
+log = "0.4.30"
 ratatui = "0.30.0"
 regex = "1.12.3"
 textwrap = "0.16.2"
@@ -48,6 +48,7 @@ ureq = { version = "3.3.0", default-features = false, features = [
 tempfile = "3.27.0"
 
 [lints.clippy]
+# Base Lint Levels
 correctness = { level = "forbid", priority = -1 }
 perf = { level = "forbid", priority = -2 }
 pedantic = { level = "deny", priority = -3 }
@@ -55,38 +56,91 @@ style = { level = "warn", priority = -4 }
 complexity = { level = "warn", priority = -5 }
 suspicious = { level = "warn", priority = -6 }
 
+# Documentation
+doc-paragraphs-missing-punctuation = { level = "warn", priority = -8 }
+missing-docs-in-private-items = { level = "warn", priority = -9 }
+too-long-first-doc-paragraph = { level = "warn", priority = -10 }
+
+# Memory & Safety
+undocumented-unsafe-blocks = { level = "deny", priority = -10 }
+unnecessary-safety-doc = { level = "warn", priority = -10 }
+unnecessary-safety-comment = { level = "warn", priority = 0 }
+multiple-unsafe-ops-per-block = { level = "warn", priority = 0 }
+mem-forget = { level = "warn", priority = 0 }
+as-ptr-cast-mut = { level = "warn", priority = 0 }
+rc-mutex = { level = "warn", priority = 0 }
+
+# Floating Point Math
+lossy-float-literal = { level = "warn", priority = 0 }
+float-cmp = { level = "warn", priority = 0 }
+float-cmp-const = { level = "warn", priority = 0 }
+while-float = { level = "warn", priority = 0 }
+imprecise-flops = { level = "warn", priority = 0 }
+suboptimal-flops = { level = "warn", priority = 0 }
+cast-sign-loss = { level = "warn", priority = 0 }
+invalid-upcast-comparisons = { level = "warn", priority = 0 }
+cast_possible_wrap = { level = "warn", priority = 0 }
+cast_precision_loss = { level = "warn", priority = 0 }
+cast_possible_truncation = { level = "warn", priority = 0 }
+
+# Collections & Iterators
+string-slice = { level = "warn", priority = 0 }
+collection-is-never-read = { level = "warn", priority = 0 }
+iter-on-empty-collections = { level = "warn", priority = 0 }
+iter-on-single-items = { level = "warn", priority = 0 }
+needless-collect = { level = "warn", priority = 0 }
+search-is-some = { level = "warn", priority = 0 }
+indexing-slicing = { level = "warn", priority = 0 }
+iter-not-returning-iterator = { level = "warn", priority = 0 }
+
+# Async & Concurrency
+await-holding-lock = { level = "warn", priority = 0 }
+await-holding-refcell-ref = { level = "warn", priority = 0 }
+large-futures = { level = "warn", priority = 0 }
+
+# Panics & Error Handling
+unwrap-used = { level = "warn", priority = 0 }   # Prefer ? or expect
+get-unwrap = { level = "warn", priority = 0 }
+panic = { level = "warn", priority = 0 }
+todo = { level = "warn", priority = 0 }
+unimplemented = { level = "warn", priority = 0 }
+unreachable = { level = "warn", priority = 0 }
+unwrap-in-result = { level = "warn", priority = 0 }
+panic-in-result-fn = { level = "warn", priority = 0 }
+let-underscore-future = { level = "warn", priority = 0 }
+unused-result-ok = { level = "warn", priority = 0 }
+map-err-ignore = { level = "warn", priority = 0 }
+assertions-on-result-states = { level = "warn", priority = 0 }
+fallible-impl-from = { level = "warn", priority = 0 }
+infallible-try-from = { level = "warn", priority = 0 }
+
+# Idioms & Style
 redundant-clone = { level = "warn", priority = -4 }
 derive-partial-eq-without-eq = { level = "warn", priority = -5 }
 unnecessary-struct-initialization = { level = "warn", priority = -6 }
 redundant-pub-crate = { level = "warn", priority = -7 }
-doc_paragraphs_missing_punctuation = { level = "warn", priority = -8 }
-missing_docs_in_private_items = { level = "warn", priority = -9 }
 missing-const-for-fn = { level = "deny", priority = -9 }
-unnecessary_safety_doc = { level = "warn", priority = -10 }
-undocumented_unsafe_blocks = { level = "deny", priority = -10 }
-needless_raw_strings = { level = "warn", priority = -11 }
-branches_sharing_code = { level = "warn", priority = -11 }
-unused_trait_names = { level = "warn", priority = -12 }
-min_ident_chars = { level = "forbid", priority = -12 }
-uninlined-format-args = "allow"
-
+needless-raw-strings = { level = "warn", priority = -11 }
+branches-sharing-code = { level = "warn", priority = -11 }
+unused-trait-names = { level = "warn", priority = -12 }
+min-ident-chars = { level = "warn", priority = -12 }
+or-fun-call = { level = "warn", priority = 0 }
+path-buf-push-overwrite = { level = "deny", priority = 0 }
+uninlined-format-args = { level = "allow", priority = 0 }
+unchecked-time-subtraction = { level = "deny", priority = 0 }
+use-self = { level = "warn", priority = 0 }
+useless-let-if-seq = { level = "warn", priority = 0 }
+str-to-string = { level = "warn", priority = 0 }
+if-then-some-else-none = { level = "warn", priority = 0 }
+equatable-if-let = { level = "warn", priority = 0 }
+needless-pass-by-ref-mut = { level = "warn", priority = 0 }
+needless-type-cast = { level = "warn", priority = 0 }
+debug-assert-with-mut-call = { level = "warn", priority = 0 }
+expl-impl-clone-on-copy = { level = "warn", priority = 0 }
+dbg-macro = { level = "warn", priority = 0 }
+allow-attributes = { level = "warn", priority = 0 }
+allow-attributes-without-reason = { level = "warn", priority = 0 }
 arithmetic_side_effects = { level = "warn", priority = 0 }
-unchecked_time_subtraction = { level = "deny", priority = 0 }
-
-# Misc
-multiple_unsafe_ops_per_block = { level = "warn", priority = 0 }
-unwrap_used = { level = "warn", priority = 0 }                   # Prefer ? or expect
-lossy_float_literal = { level = "warn", priority = 0 }
-float_cmp = { level = "warn", priority = 0 }
-float_cmp_const = { level = "warn", priority = 0 }
-while_float = { level = "warn", priority = 0 }
-string_slice = { level = "warn", priority = 0 }
-get_unwrap = { level = "warn", priority = 0 }
-mem_forget = { level = "warn", priority = 0 }
-use_self = { level = "warn", priority = 0 }
-useless_let_if_seq = { level = "warn", priority = 0 }
-str_to_string = { level = "warn", priority = 0 }
-if_then_some_else_none = { level = "warn", priority = 0 }
 
 # The profile that 'dist' will build with
 [profile.dist]

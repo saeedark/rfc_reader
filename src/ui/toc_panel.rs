@@ -499,6 +499,10 @@ pub mod parsing
                 line.contains('.')
             {
                 let parts: Vec<&str> = line.splitn(2, '.').collect();
+                #[expect(
+                    clippy::indexing_slicing,
+                    reason = "We already checked the length"
+                )]
                 if parts.len() == 2 && !parts[0].contains(' ')
                 {
                     entries.push(TocEntry {
