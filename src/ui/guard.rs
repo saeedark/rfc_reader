@@ -13,7 +13,9 @@ use anyhow::Result;
 use crossterm::ExecutableCommand as _;
 use crossterm::cursor::{SetCursorStyle, Show};
 use crossterm::terminal::{
-    EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode,
+    EnterAlternateScreen,
+    LeaveAlternateScreen,
+    disable_raw_mode,
     enable_raw_mode,
 };
 use log::error;

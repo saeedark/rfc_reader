@@ -1448,7 +1448,7 @@ fn determine_search_strategy(total_lines: usize) -> SearchStrategy
 ///
 /// A compiled `Regex` if the query is valid, or `None` if invalid.
 #[cached(
-    size = 20,
+    max_size = 20,
     key = "String",
     convert = r#"{ format!("{}-{}-{}", query, is_case_sensitive, is_regex) }"#
 )]

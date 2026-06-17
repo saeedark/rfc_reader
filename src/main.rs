@@ -9,7 +9,9 @@ use ratatui::backend::Backend as RatatuiBackend;
 use rfc_reader::cache::RfcCache;
 use rfc_reader::client::RfcClient;
 use rfc_reader::logging::{
-    clear_log_files, get_log_files_dir_path, init_logging,
+    clear_log_files,
+    get_log_files_dir_path,
+    init_logging,
 };
 use rfc_reader::types::RfcNum;
 use rfc_reader::ui::guard::{init_panic_hook, init_tui};
