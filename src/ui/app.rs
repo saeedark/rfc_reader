@@ -69,7 +69,8 @@ const PARALLEL_SEARCH_MIN_LINES_PER_WORKER: usize = 250;
 ///
 /// Controls what is displayed and how the user input is interpreted.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AppMode {
+pub enum AppMode
+{
     /// Normal reading mode, default state.
     Normal,
     /// Help overlay being displayed.
@@ -96,8 +97,10 @@ bitflags! {
     }
 }
 
-impl Default for AppStateFlags {
-    fn default() -> Self {
+impl Default for AppStateFlags
+{
+    fn default() -> Self
+    {
         Self::SHOULD_RUN
     }
 }
@@ -106,7 +109,8 @@ impl Default for AppStateFlags {
 ///
 /// This includes rendering the document, processing user input, and handling
 /// interactions like scrolling, searching, navigation and graceful shutdown.
-pub struct App {
+pub struct App
+{
     // Core document
     /// Content of the currently loaded RFC.
     pub rfc_content: Box<str>,
@@ -147,7 +151,8 @@ pub struct App {
     pub query_matches: HashMap<LineNumber, Vec<MatchSpan>>,
 }
 
-impl App {
+impl App
+{
     /// Creates a new App instance with the specified RFC.
     ///
     /// # Arguments
@@ -159,12 +164,14 @@ impl App {
     ///
     /// A new `App` instance initialized for the specified RFC.
     #[must_use]
-    pub fn new(rfc_number: RfcNum, rfc_content: Box<str>) -> Self {
+    pub fn new(rfc_number: RfcNum, rfc_content: Box<str>) -> Self
+    {
         let rfc_toc_panel = TocPanel::new(&rfc_content);
         let rfc_line_number = rfc_content.lines().count();
 
         let title = format!("RFC {rfc_number} - Press ? for help");
-        if let Err(error) = execute!(stdout(), SetTitle(title)) {
+        if let Err(error) = execute!(stdout(), SetTitle(title))
+        {
             warn!("Couldn't set the window title: {error}");
         }
 
@@ -182,16 +189,18 @@ impl App {
     /// # Returns
     ///
     /// A boolean indicating if the terminal is too small.
-    fn is_terminal_too_small() -> bool {
+    fn is_terminal_too_small() -> bool
+    {
         let (current_width, current_height) =
             size().expect("Couldn't get terminal size");
 
-        current_width < MIN_TERMINAL_WIDTH
-            || current_height < MIN_TERMINAL_HEIGHT
+        current_width < MIN_TERMINAL_WIDTH ||
+            current_height < MIN_TERMINAL_HEIGHT
     }
 
     /// Builds the RFC text with highlighting for search matches and titles.
-    fn build_text(&self) -> Text<'_> {
+    fn build_text(&self) -> Text<'_>
+    {
         // Keep confirmed highlights in Normal mode, but hide them while
         // actively editing in Search mode to avoid stale visuals.
         let should_show_search_highlights =
@@ -249,26 +258,32 @@ impl App {
         line_str: &'line_str str,
         matches: &[MatchSpan],
         is_title: bool,
-    ) -> Line<'line_str> {
+    ) -> Line<'line_str>
+    {
         let mut spans = Vec::new();
         let mut last_end = 0;
 
-        for match_span in matches {
+        for match_span in matches
+        {
             // Clamp indexes to the line length to avoid out of bounds access
             let start = match_span.start.min(line_str.len());
             let end = match_span.end.min(line_str.len());
 
-            if start > last_end
-                && let Some(text) = line_str.get(last_end..start)
+            if start > last_end &&
+                let Some(text) = line_str.get(last_end..start)
             {
-                if is_title {
+                if is_title
+                {
                     spans.push(Span::styled(text, TITLE_HIGHLIGHT_STYLE));
-                } else {
+                }
+                else
+                {
                     spans.push(Span::raw(text));
                 }
             }
 
-            if let Some(mtc) = line_str.get(start..end) {
+            if let Some(mtc) = line_str.get(start..end)
+            {
                 spans.push(Span::styled(mtc, MATCH_HIGHLIGHT_STYLE));
             }
 
@@ -276,12 +291,15 @@ impl App {
         }
 
         // Add remaining text after the last match
-        if last_end < line_str.len()
-            && let Some(text) = line_str.get(last_end..)
+        if last_end < line_str.len() &&
+            let Some(text) = line_str.get(last_end..)
         {
-            if is_title {
+            if is_title
+            {
                 spans.push(Span::styled(text, TITLE_HIGHLIGHT_STYLE));
-            } else {
+            }
+            else
+            {
                 spans.push(Span::raw(text));
             }
         }
@@ -298,11 +316,13 @@ impl App {
     /// # Panics
     ///
     /// Panics if the frame cannot be rendered.
-    pub fn render(&mut self, frame: &mut Frame) {
+    pub fn render(&mut self, frame: &mut Frame)
+    {
         /// Height of the status bar in rows.
         const STATUSBAR_HEIGHT_CONSTRAINT: Constraint = Constraint::Length(1);
 
-        if Self::is_terminal_too_small() {
+        if Self::is_terminal_too_small()
+        {
             Self::render_too_small_message(frame);
             return;
         }
@@ -330,11 +350,14 @@ impl App {
                 .areas(main_area);
 
             (content_area, Some(toc_area))
-        } else {
+        }
+        else
+        {
             (main_area, None)
         };
 
-        if let Some(toc_area) = toc_area {
+        if let Some(toc_area) = toc_area
+        {
             // Render ToC in the left area
             self.rfc_toc_panel.render(frame, toc_area);
         }
@@ -356,12 +379,14 @@ impl App {
         self.render_statusbar(frame, statusbar_area);
 
         // Render help if in help mode
-        if self.mode == AppMode::Help {
+        if self.mode == AppMode::Help
+        {
             Self::render_help(frame);
         }
 
         // Render search if in search mode
-        if self.mode == AppMode::Search {
+        if self.mode == AppMode::Search
+        {
             self.render_search(frame);
         }
 
@@ -379,7 +404,8 @@ impl App {
     /// # Arguments
     ///
     /// * `frame` - The frame to render the help overlay to
-    fn render_help(frame: &mut Frame) {
+    fn render_help(frame: &mut Frame)
+    {
         /// Help overlay box width as percentage of the terminal width.
         const HELP_OVERLAY_WIDTH_CONSTRAINT: Constraint =
             Constraint::Percentage(60);
@@ -402,7 +428,6 @@ impl App {
             Line::from(""),
             // Vim-like navigation
             Line::from("j/k or ↓/↑: Scroll down/up"),
-            Line::from("h/l : Scroll one RFC page down/up"),
             Line::from("f/b or PgDn/PgUp: Scroll page down/up"),
             Line::from("g/G: Go to start/end of document"),
             Line::from(""),
@@ -440,7 +465,8 @@ impl App {
     /// # Arguments
     ///
     /// * `frame` - The frame to render the search box to
-    fn render_search(&self, frame: &mut Frame) {
+    fn render_search(&self, frame: &mut Frame)
+    {
         /// Search prompt prefix.
         const SEARCH_PROMPT: &str = "/";
         /// Prefix length for the search prompt ("/").
@@ -515,7 +541,8 @@ impl App {
     /// # Arguments
     ///
     /// * `frame` - The frame to render the no search results message to
-    fn render_no_search_results(frame: &mut Frame) {
+    fn render_no_search_results(frame: &mut Frame)
+    {
         /// No-search-results overlay width as percentage of the terminal width.
         const NO_SEARCH_OVERLAY_WIDTH_CONSTRAINT: Constraint =
             Constraint::Percentage(40);
@@ -559,7 +586,8 @@ impl App {
     /// # Arguments
     ///
     /// * `frame` - The frame to render the too small message to
-    fn render_too_small_message(frame: &mut Frame) {
+    fn render_too_small_message(frame: &mut Frame)
+    {
         /// "Terminal too small" overlay height as percentage of the terminal
         /// height.
         const TOO_SMALL_OVERLAY_HEIGHT_CONSTRAINT: Constraint =
@@ -571,15 +599,21 @@ impl App {
             size().expect("Couldn't get terminal size");
 
         // Determine colors based on whether dimensions meet requirements
-        let current_width_color = if current_width >= MIN_TERMINAL_WIDTH {
+        let current_width_color = if current_width >= MIN_TERMINAL_WIDTH
+        {
             Color::Green
-        } else {
+        }
+        else
+        {
             Color::Red
         };
 
-        let current_height_color = if current_height >= MIN_TERMINAL_HEIGHT {
+        let current_height_color = if current_height >= MIN_TERMINAL_HEIGHT
+        {
             Color::Green
-        } else {
+        }
+        else
+        {
             Color::Red
         };
 
@@ -648,7 +682,8 @@ impl App {
     ///
     /// * `frame` - The frame to render the statusbar to
     /// * `area` - The area to render the statusbar in
-    fn render_statusbar(&self, frame: &mut Frame, area: Rect) {
+    fn render_statusbar(&self, frame: &mut Frame, area: Rect)
+    {
         // Build text content first so sections are sized to their actual
         // content.
         let progress_text = self.build_progress_text();
@@ -701,8 +736,10 @@ impl App {
     /// # Returns
     ///
     /// A string containing the current mode.
-    fn get_mode_text(&self) -> Cow<'static, str> {
-        match self.mode {
+    fn get_mode_text(&self) -> Cow<'static, str>
+    {
+        match self.mode
+        {
             AppMode::Normal
                 if self
                     .app_state
@@ -722,7 +759,8 @@ impl App {
     /// # Returns
     ///
     /// A string containing the search mode text.
-    fn get_search_mode_text(&self) -> String {
+    fn get_search_mode_text(&self) -> String
+    {
         const EMPTY_BOX_CHAR: char = '☐';
         const CHECKED_BOX_CHAR: char = '☑';
 
@@ -731,7 +769,9 @@ impl App {
             .contains(AppStateFlags::IS_CASE_SENSITIVE)
         {
             CHECKED_BOX_CHAR
-        } else {
+        }
+        else
+        {
             EMPTY_BOX_CHAR
         };
 
@@ -740,7 +780,9 @@ impl App {
             .contains(AppStateFlags::IS_USING_REGEX)
         {
             CHECKED_BOX_CHAR
-        } else {
+        }
+        else
+        {
             EMPTY_BOX_CHAR
         };
 
@@ -757,7 +799,8 @@ impl App {
         clippy::arithmetic_side_effects,
         reason = "LineNumber not expected to overflow"
     )]
-    fn build_progress_text(&self) -> String {
+    fn build_progress_text(&self) -> String
+    {
         let progress_percentage = {
             let last_line_pos = self.rfc_line_number.saturating_sub(1);
 
@@ -788,9 +831,11 @@ impl App {
         clippy::arithmetic_side_effects,
         reason = "LineNumber not expected to overflow"
     )]
-    fn build_search_info(&self) -> Option<String> {
+    fn build_search_info(&self) -> Option<String>
+    {
         // Don't show the previous search's info when entering a new search.
-        if self.mode == AppMode::Search || !self.has_search_results() {
+        if self.mode == AppMode::Search || !self.has_search_results()
+        {
             return None;
         }
 
@@ -809,8 +854,10 @@ impl App {
     /// # Returns
     ///
     /// A string containing the help text for the statusbar.
-    const fn get_help_text(&self) -> &'static str {
-        match (self.mode, self.has_search_results()) {
+    const fn get_help_text(&self) -> &'static str
+    {
+        match (self.mode, self.has_search_results())
+        {
             (AppMode::Normal, _)
                 if self
                     .app_state
@@ -819,7 +866,8 @@ impl App {
                 "t:toggle ToC  w/s:nav  Enter:jump  q:quit"
             },
             (AppMode::Normal, true) => "n/N:next/prev  Esc:clear",
-            (AppMode::Normal, false) => {
+            (AppMode::Normal, false) =>
+            {
                 "up/down:scroll  /:search  ?:help  q:quit"
             },
             (AppMode::Help, _) => "?/Esc:close",
@@ -832,7 +880,8 @@ impl App {
     /// # Arguments
     ///
     /// * `amount` - Number of lines to scroll up
-    pub const fn scroll_up(&mut self, amount: LineNumber) {
+    pub const fn scroll_up(&mut self, amount: LineNumber)
+    {
         // Don't allow wrapping, once we reach the top, stay there.
         self.current_scroll_pos = self
             .current_scroll_pos
@@ -844,7 +893,8 @@ impl App {
     /// # Arguments
     ///
     /// * `amount` - Number of lines to scroll down
-    pub fn scroll_down(&mut self, amount: LineNumber) {
+    pub fn scroll_down(&mut self, amount: LineNumber)
+    {
         let last_line_pos = self.rfc_line_number.saturating_sub(1);
         // Clamp the scroll position to the last line.
         // Once we reach the bottom, stay there.
@@ -857,17 +907,23 @@ impl App {
     /// Jumps to the current `ToC` entry by scrolling to its line.
     ///
     /// If no entry is selected, does nothing.
-    pub fn jump_to_toc_entry(&mut self) {
-        if let Some(line_num) = self.rfc_toc_panel.selected_line() {
+    pub fn jump_to_toc_entry(&mut self)
+    {
+        if let Some(line_num) = self.rfc_toc_panel.selected_line()
+        {
             self.current_scroll_pos = line_num;
         }
     }
 
     /// Toggles the help overlay.
-    pub fn toggle_help(&mut self) {
-        self.mode = if self.mode == AppMode::Help {
+    pub fn toggle_help(&mut self)
+    {
+        self.mode = if self.mode == AppMode::Help
+        {
             AppMode::Normal
-        } else {
+        }
+        else
+        {
             AppMode::Help
         };
     }
@@ -875,7 +931,8 @@ impl App {
     /// Toggles the table of contents panel.
     ///
     /// If the panel is shown, it will be hidden, and vice versa.
-    pub fn toggle_toc(&mut self) {
+    pub fn toggle_toc(&mut self)
+    {
         self.app_state
             .toggle(AppStateFlags::SHOULD_SHOW_TOC);
     }
@@ -884,7 +941,8 @@ impl App {
     ///
     /// If case sensitivity is enabled, searches will be case-sensitive.
     /// If disabled, searches will be case-insensitive.
-    pub fn toggle_case_sensitivity(&mut self) {
+    pub fn toggle_case_sensitivity(&mut self)
+    {
         self.app_state
             .toggle(AppStateFlags::IS_CASE_SENSITIVE);
     }
@@ -893,29 +951,34 @@ impl App {
     ///
     /// If regex mode is enabled, searches will interpret the query as a regex
     /// pattern.
-    pub fn toggle_regex_mode(&mut self) {
+    pub fn toggle_regex_mode(&mut self)
+    {
         self.app_state
             .toggle(AppStateFlags::IS_USING_REGEX);
     }
 
     /// Enters search mode, clearing any previous search.
-    pub fn enter_search_mode(&mut self) {
+    pub fn enter_search_mode(&mut self)
+    {
         self.mode = AppMode::Search;
         self.query_text.clear(); // Start with an empty search
         self.query_cursor_pos = 0;
 
         // Show cursor when entering search mode
-        if let Err(error) = execute!(stdout(), Show) {
+        if let Err(error) = execute!(stdout(), Show)
+        {
             warn!("Failed to show cursor: {error}");
         }
     }
 
     /// Exits search mode and returns to normal mode.
-    pub fn exit_search_mode(&mut self) {
+    pub fn exit_search_mode(&mut self)
+    {
         self.mode = AppMode::Normal;
 
         // Hide cursor when exiting search mode
-        if let Err(error) = execute!(stdout(), Hide) {
+        if let Err(error) = execute!(stdout(), Hide)
+        {
             warn!("Failed to hide cursor: {error}");
         }
     }
@@ -925,7 +988,8 @@ impl App {
     /// # Returns
     ///
     /// A boolean indicating if there are any search results.
-    const fn has_search_results(&self) -> bool {
+    const fn has_search_results(&self) -> bool
+    {
         !self.query_text.is_empty() && !self.query_match_line_nums.is_empty()
     }
 
@@ -934,7 +998,8 @@ impl App {
     /// # Arguments
     ///
     /// * `ch` - The character to add
-    pub fn add_search_char(&mut self, ch: char) {
+    pub fn add_search_char(&mut self, ch: char)
+    {
         self.query_text
             .insert(self.query_cursor_pos, ch);
         self.query_cursor_pos = self
@@ -943,26 +1008,33 @@ impl App {
     }
 
     /// Removes the character before the cursor in the search text.
-    pub fn remove_search_char(&mut self) {
-        if self.query_cursor_pos > 0 {
+    pub fn remove_search_char(&mut self)
+    {
+        if self.query_cursor_pos > 0
+        {
             self.move_search_cursor_left();
             self.delete_search_char();
         }
     }
 
     /// Deletes the character front of the cursor in the search text.
-    pub fn delete_search_char(&mut self) {
-        if self.query_cursor_pos < self.query_text.len() {
+    pub fn delete_search_char(&mut self)
+    {
+        if self.query_cursor_pos < self.query_text.len()
+        {
             self.query_text.remove(self.query_cursor_pos);
         }
     }
 
     /// Moves the search cursor left by one character.
-    pub fn move_search_cursor_left(&mut self) {
-        if self.query_cursor_pos > 0 {
+    pub fn move_search_cursor_left(&mut self)
+    {
+        if self.query_cursor_pos > 0
+        {
             // Find the previous character boundary
             let mut pos = self.query_cursor_pos.saturating_sub(1);
-            while pos > 0 && !self.query_text.is_char_boundary(pos) {
+            while pos > 0 && !self.query_text.is_char_boundary(pos)
+            {
                 pos = pos.saturating_sub(1);
             }
             self.query_cursor_pos = pos;
@@ -970,11 +1042,13 @@ impl App {
     }
 
     /// Moves the search cursor right by one character.
-    pub fn move_search_cursor_right(&mut self) {
-        if self.query_cursor_pos < self.query_text.len() {
+    pub fn move_search_cursor_right(&mut self)
+    {
+        if self.query_cursor_pos < self.query_text.len()
+        {
             let mut pos = self.query_cursor_pos.saturating_add(1);
-            while pos < self.query_text.len()
-                && !self.query_text.is_char_boundary(pos)
+            while pos < self.query_text.len() &&
+                !self.query_text.is_char_boundary(pos)
             {
                 pos = pos.saturating_add(1);
             }
@@ -983,12 +1057,14 @@ impl App {
     }
 
     /// Moves the search cursor to the start of the text.
-    pub const fn move_search_cursor_home(&mut self) {
+    pub const fn move_search_cursor_home(&mut self)
+    {
         self.query_cursor_pos = 0;
     }
 
     /// Moves the search cursor to the end of the text.
-    pub const fn move_search_cursor_end(&mut self) {
+    pub const fn move_search_cursor_end(&mut self)
+    {
         self.query_cursor_pos = self.query_text.len();
     }
 
@@ -997,11 +1073,13 @@ impl App {
     /// Finds all occurrences of the search text in the RFC content
     /// and stores the results. If results are found, jumps to the
     /// first result starting from the current scroll position.
-    pub fn perform_search(&mut self) {
+    pub fn perform_search(&mut self)
+    {
         self.query_match_line_nums.clear();
         self.query_matches.clear();
 
-        if self.query_text.is_empty() {
+        if self.query_text.is_empty()
+        {
             return;
         }
 
@@ -1016,7 +1094,9 @@ impl App {
             self.query_text.clone(),
             is_case_sensitive,
             is_regex,
-        ) else {
+        )
+        else
+        {
             self.app_state
                 .insert(AppStateFlags::HAS_NO_RESULTS);
             return;
@@ -1032,18 +1112,21 @@ impl App {
         self.query_matches
             .reserve(search_results.len());
 
-        for (line_num, matches_in_line) in search_results {
+        for (line_num, matches_in_line) in search_results
+        {
             self.query_match_line_nums.push(line_num);
             self.query_matches
                 .insert(line_num, matches_in_line);
         }
 
-        if self.query_match_line_nums.is_empty() {
+        if self.query_match_line_nums.is_empty()
+        {
             self.app_state
                 .insert(AppStateFlags::HAS_NO_RESULTS);
         }
         // Jump to the first result starting from our location.
-        else {
+        else
+        {
             self.app_state
                 .remove(AppStateFlags::HAS_NO_RESULTS);
 
@@ -1061,8 +1144,10 @@ impl App {
     /// Moves to the next search result after the current scroll position.
     ///
     /// If there are no search results, does nothing.
-    pub fn next_search_result(&mut self) {
-        if !self.has_search_results() {
+    pub fn next_search_result(&mut self)
+    {
+        if !self.has_search_results()
+        {
             return;
         }
 
@@ -1080,8 +1165,10 @@ impl App {
     /// Moves to the previous search result before the current scroll position.
     ///
     /// If there are no search results, does nothing.
-    pub fn prev_search_result(&mut self) {
-        if !self.has_search_results() {
+    pub fn prev_search_result(&mut self)
+    {
+        if !self.has_search_results()
+        {
             return;
         }
 
@@ -1097,7 +1184,8 @@ impl App {
     }
 
     /// Jumps to the current search result by scrolling to its line.
-    fn jump_to_search_result(&mut self) {
+    fn jump_to_search_result(&mut self)
+    {
         if let Some(line_num) = self
             .query_match_line_nums
             .get(self.current_query_match_index)
@@ -1107,7 +1195,8 @@ impl App {
     }
 
     /// Resets the search highlights.
-    pub fn reset_search_highlights(&mut self) {
+    pub fn reset_search_highlights(&mut self)
+    {
         self.query_text.clear();
         self.query_match_line_nums.clear();
         self.query_matches.clear();
@@ -1117,8 +1206,10 @@ impl App {
     }
 }
 
-impl Default for App {
-    fn default() -> Self {
+impl Default for App
+{
+    fn default() -> Self
+    {
         /// Initial capacities for common collections.
         const QUERY_TEXT_INITIAL_CAPACITY: usize = 20;
         const QUERY_RESULTS_INITIAL_CAPACITY: usize = 50;
@@ -1163,7 +1254,8 @@ fn centered_rect(
     area: Rect,
     horizontal: Constraint,
     vertical: Constraint,
-) -> Rect {
+) -> Rect
+{
     let [area] = Layout::horizontal([horizontal])
         .flex(Flex::Center)
         .areas(area);
@@ -1175,11 +1267,13 @@ fn centered_rect(
 
 /// Search execution strategy for collecting query matches.
 #[derive(Debug, Clone, Copy)]
-enum SearchStrategy {
+enum SearchStrategy
+{
     /// Process search linearly on a single thread.
     Serial,
     /// Process search using multiple workers.
-    Parallel {
+    Parallel
+    {
         /// Number of worker threads to spawn.
         worker_count: usize,
     },
@@ -1202,11 +1296,14 @@ enum SearchStrategy {
 fn collect_search_matches(
     regex: &Regex,
     content: &str,
-) -> Vec<(LineNumber, Vec<MatchSpan>)> {
+) -> Vec<(LineNumber, Vec<MatchSpan>)>
+{
     let lines: Vec<&str> = content.lines().collect();
 
-    let worker_count = match determine_search_strategy(lines.len()) {
-        SearchStrategy::Serial => {
+    let worker_count = match determine_search_strategy(lines.len())
+    {
+        SearchStrategy::Serial =>
+        {
             return collect_search_matches_serial(regex, &lines, 0);
         },
         SearchStrategy::Parallel { worker_count } => worker_count,
@@ -1219,7 +1316,8 @@ fn collect_search_matches(
         thread::scope(|scope| {
             let mut handles = Vec::with_capacity(worker_count);
 
-            for (chunk_index, chunk) in lines.chunks(chunk_size).enumerate() {
+            for (chunk_index, chunk) in lines.chunks(chunk_size).enumerate()
+            {
                 let line_offset = chunk_index.saturating_mul(chunk_size);
                 handles.push(scope.spawn(move || {
                     collect_search_matches_serial(regex, chunk, line_offset)
@@ -1229,9 +1327,12 @@ fn collect_search_matches(
             let mut all_matches: Vec<(LineNumber, Vec<MatchSpan>)> =
                 Vec::with_capacity(handles.len());
 
-            for handle in handles {
-                match handle.join() {
-                    Ok(mut chunk_matches) => {
+            for handle in handles
+            {
+                match handle.join()
+                {
+                    Ok(mut chunk_matches) =>
+                    {
                         all_matches.append(&mut chunk_matches);
                     },
                     Err(_) => return None,
@@ -1263,16 +1364,20 @@ fn collect_search_matches_serial(
     regex: &Regex,
     lines: &[&str],
     line_offset: LineNumber,
-) -> Vec<(LineNumber, Vec<MatchSpan>)> {
+) -> Vec<(LineNumber, Vec<MatchSpan>)>
+{
     let mut results = Vec::new();
 
-    for (relative_line_num, line) in lines.iter().enumerate() {
+    for (relative_line_num, line) in lines.iter().enumerate()
+    {
         let mut matches_in_line: Vec<MatchSpan> = Vec::new();
-        for r#match in regex.find_iter(line) {
+        for r#match in regex.find_iter(line)
+        {
             matches_in_line.push(r#match.range());
         }
 
-        if !matches_in_line.is_empty() {
+        if !matches_in_line.is_empty()
+        {
             // Sort ranges defensively to keep deterministic highlight order.
             matches_in_line.sort_unstable_by_key(|span: &MatchSpan| span.start);
             matches_in_line.shrink_to_fit();
@@ -1300,14 +1405,17 @@ fn collect_search_matches_serial(
 ///   not available
 /// * [`SearchStrategy::Parallel`] with the number of worker threads to use for
 ///   larger documents
-fn determine_search_strategy(total_lines: usize) -> SearchStrategy {
-    if total_lines < MIN_LINES_FOR_PARALLEL_SEARCH {
+fn determine_search_strategy(total_lines: usize) -> SearchStrategy
+{
+    if total_lines < MIN_LINES_FOR_PARALLEL_SEARCH
+    {
         return SearchStrategy::Serial;
     }
 
     let Ok(available_workers) =
         thread::available_parallelism().map(std::num::NonZeroUsize::get)
-    else {
+    else
+    {
         return SearchStrategy::Serial;
     };
 
@@ -1316,10 +1424,13 @@ fn determine_search_strategy(total_lines: usize) -> SearchStrategy {
 
     let worker_count = available_workers.min(line_limited_workers);
 
-    if worker_count <= 1 {
+    if worker_count <= 1
+    {
         // 1 worker ain't making sense for parallelism, just do it serially.
         SearchStrategy::Serial
-    } else {
+    }
+    else
+    {
         SearchStrategy::Parallel { worker_count }
     }
 }
@@ -1345,10 +1456,14 @@ fn get_compiled_regex(
     query: String,
     is_case_sensitive: bool,
     is_regex: bool,
-) -> Option<Regex> {
-    let pattern = if is_regex {
+) -> Option<Regex>
+{
+    let pattern = if is_regex
+    {
         query
-    } else {
+    }
+    else
+    {
         regex::escape(&query)
     };
 
