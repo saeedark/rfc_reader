@@ -203,6 +203,15 @@ where
                     {
                         app.scroll_up(1);
                     },
+                    // RFC page scroll in normal mode
+                    (AppMode::Normal, KeyCode::Char('h')) =>
+                    {
+                        app.scroll_down(56);
+                    },
+                    (AppMode::Normal, KeyCode::Char('l')) =>
+                    {
+                        app.scroll_up(56);
+                    },
                     // Scroll the whole viewpoint
                     (
                         AppMode::Normal,

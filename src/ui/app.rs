@@ -428,6 +428,7 @@ impl App
             Line::from(""),
             // Vim-like navigation
             Line::from("j/k or ↓/↑: Scroll down/up"),
+            Line::from("h/l: RFC page Scroll down/up"),
             Line::from("f/b or PgDn/PgUp: Scroll page down/up"),
             Line::from("g/G: Go to start/end of document"),
             Line::from(""),
